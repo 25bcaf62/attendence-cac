@@ -1,10 +1,9 @@
 import importlib
 import json
+import mimetypes
 import os
-from http import HTTPStatus
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from wsgiref.simple_server import make_server
 
 try:
     psycopg = importlib.import_module("psycopg")
@@ -51,52 +50,68 @@ def check_database_health():
         }
 
 
-class AppHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, directory=None, **kwargs):
-        super().__init__(*args, directory=str(PROJECT_DIR), **kwargs)
+def json_response(start_response, status, payload):
+    response = json.dumps(payload).encode("utf-8")
+    headers = [
+        ("Content-Type", "application/json; charset=utf-8"),
+        ("Content-Length", str(len(response)))
+    ]
+    start_response(status, headers)
+    return [response]
 
-    def do_GET(self):
-        parsed_url = urlparse(self.path)
 
-        if parsed_url.path == "/health":
-            self._send_json(
-                HTTPStatus.OK,
-                {
-                    "status": "ok",
-                    "service": "attendance-calculator",
-                    "database_health_endpoint": "/health/db"
-                }
-            )
-            return
+def serve_file(start_response, relative_path):
+    requested_path = (PROJECT_DIR / relative_path.lstrip("/")).resolve()
 
-        if parsed_url.path == "/health/db":
-            db_health = check_database_health()
-            status_code = HTTPStatus.OK if db_health["status"] in {"ok", "not_configured"} else HTTPStatus.SERVICE_UNAVAILABLE
-            self._send_json(status_code, db_health)
-            return
+    if PROJECT_DIR not in requested_path.parents and requested_path != PROJECT_DIR:
+        start_response("403 Forbidden", [("Content-Type", "text/plain; charset=utf-8")])
+        return [b"Forbidden"]
 
-        if parsed_url.path == "/":
-            self.path = "/index.html"
+    if not requested_path.exists() or requested_path.is_dir():
+        start_response("404 Not Found", [("Content-Type", "text/plain; charset=utf-8")])
+        return [b"Not Found"]
 
-        super().do_GET()
+    content_type, _ = mimetypes.guess_type(str(requested_path))
+    body = requested_path.read_bytes()
+    headers = [
+        ("Content-Type", content_type or "application/octet-stream"),
+        ("Content-Length", str(len(body)))
+    ]
+    start_response("200 OK", headers)
+    return [body]
 
-    def _send_json(self, status_code, payload):
-        response = json.dumps(payload).encode("utf-8")
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(response)))
-        self.end_headers()
-        self.wfile.write(response)
+
+def app(environ, start_response):
+    path = environ.get("PATH_INFO", "/")
+
+    if path == "/health":
+        return json_response(
+            start_response,
+            "200 OK",
+            {
+                "status": "ok",
+                "service": "attendance-calculator",
+                "database_health_endpoint": "/health/db"
+            }
+        )
+
+    if path == "/health/db":
+        db_health = check_database_health()
+        status = "200 OK" if db_health["status"] in {"ok", "not_configured"} else "503 Service Unavailable"
+        return json_response(start_response, status, db_health)
+
+    if path == "/":
+        return serve_file(start_response, "index.html")
+
+    return serve_file(start_response, path)
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer((HOST, PORT), AppHandler)
     print(f"Attendance calculator running at http://{HOST}:{PORT}/")
     print(f"App health check: http://{HOST}:{PORT}/health")
     print(f"Database health check: http://{HOST}:{PORT}/health/db")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nServer stopped.")
-    finally:
-        server.server_close()
+    with make_server(HOST, PORT, app) as server:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("\nServer stopped.")
