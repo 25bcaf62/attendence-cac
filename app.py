@@ -10,6 +10,14 @@ try:
 except ImportError:
     psycopg = None
 
+try:
+    dotenv = importlib.import_module("dotenv")
+except ImportError:
+    dotenv = None
+
+if dotenv is not None:
+    dotenv.load_dotenv()
+
 
 HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", "5000"))
