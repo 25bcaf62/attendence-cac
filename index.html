@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="background-orb orb-one"></div>
+  <div class="background-orb orb-two"></div>
+  <div class="background-grid"></div>
+
+  <section id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <p class="eyebrow">Kristu Jayanti Access</p>
+      <h1 class="auth-title">Login To Continue</h1>
+      <p class="auth-copy">
+        Use your registered email account to open the attendance dashboard.
+        Sign up first if you do not have an account yet.
+      </p>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <label class="input-group">
+          <span>Email</span>
+          <input id="loginEmail" type="email" placeholder="name@example.com" required>
+        </label>
+
+        <label class="input-group">
+          <span>Password</span>
+          <input id="loginPassword" type="password" placeholder="Enter your password" required>
+        </label>
+
+        <button type="submit" class="primary-btn">Login</button>
+      </form>
+
+      <p id="loginStatus" class="auth-status" aria-live="polite"></p>
+      <p class="auth-helper">
+        New here?
+        <a href="signup.html">Create your account</a>
+      </p>
+    </div>
+  </section>
+
+  <main id="appShell" class="page-shell app-shell is-locked">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Attendance Workspace</p>
+        <h2 class="topbar-title">Welcome, <span id="loggedInName">Student</span></h2>
+      </div>
+      <button type="button" id="logoutButton" class="secondary-btn">Logout</button>
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-text">
+        <p class="eyebrow">Student Toolkit</p>
+        <h1>Attendance Calculator</h1>
+        <p class="hero-copy">
+          Check your current attendance, see how many classes you can safely miss,
+          or find out how many you need to attend to reach your target.
+        </p>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="visual-ring ring-large"></div>
+        <div class="visual-ring ring-small"></div>
+        <div class="visual-core">
+          <span class="core-number">75%</span>
+          <span class="core-label">Target Zone</span>
+        </div>
+        <div class="floating-badge badge-top">On Track</div>
+        <div class="floating-badge badge-bottom">3 Classes Buffer</div>
+      </div>
+    </section>
+
+    <section class="calculator-card">
+      <div class="card-heading">
+        <h2>Enter Your Details</h2>
+        <p>Fill in your attendance numbers and we will do the math instantly.</p>
+      </div>
+
+      <form id="attendance-form" class="calculator-form" novalidate>
+        <label class="input-group">
+          <span>Total Classes Held</span>
+          <input id="totalClasses" type="number" min="0" step="1" placeholder="e.g. 48" required>
+        </label>
+
+        <label class="input-group">
+          <span>Classes Attended</span>
+          <input id="attendedClasses" type="number" min="0" step="1" placeholder="e.g. 40" required>
+        </label>
+
+        <label class="input-group">
+          <span>Target Attendance %</span>
+          <input id="targetPercentage" type="number" min="1" max="100" step="0.01" value="75" required>
+        </label>
+
+        <div class="button-row">
+          <button type="submit" class="primary-btn">Calculate</button>
+          <button type="button" id="resetButton" class="secondary-btn">Reset</button>
+        </div>
+      </form>
+
+      <p id="errorMessage" class="error-message" aria-live="polite"></p>
+    </section>
+
+    <section class="results-grid" aria-live="polite">
+      <article class="result-card accent reveal-card">
+        <p class="result-label">Current Attendance</p>
+        <h3 id="currentAttendance">0%</h3>
+        <p id="attendanceStatus" class="result-copy">Enter your details to see your status.</p>
+        <div class="card-glow" aria-hidden="true"></div>
+      </article>
+
+      <article class="result-card reveal-card">
+        <p class="result-label">You Can Miss</p>
+        <h3 id="canMiss">0</h3>
+        <p class="result-copy">classes while staying at or above your target.</p>
+        <div class="mini-chart" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </article>
+
+      <article class="result-card reveal-card">
+        <p class="result-label">Need To Attend</p>
+        <h3 id="needToAttend">0</h3>
+        <p class="result-copy">more consecutive classes to reach your target.</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="feedback-card">
+      <div class="card-heading">
+        <h2>Share Feedback</h2>
+        <p>One response is allowed per name and email combination.</p>
+      </div>
+
+      <form id="feedback-form" class="feedback-form" novalidate>
+        <label class="input-group">
+          <span>Your Name</span>
+          <input id="feedbackName" type="text" placeholder="e.g. Shrey" required>
+        </label>
+
+        <label class="input-group">
+          <span>Email Address</span>
+          <input id="feedbackEmail" type="email" placeholder="e.g. shrey@example.com" required>
+        </label>
+
+        <label class="input-group feedback-message-group">
+          <span>Your Feedback</span>
+          <textarea id="feedbackMessage" rows="5" placeholder="Write at least 20 words about your experience." required></textarea>
+        </label>
+
+        <button type="submit" class="primary-btn">Submit Feedback</button>
+      </form>
+
+      <p id="feedbackStatus" class="feedback-status" aria-live="polite"></p>
+    </section>
+
+    <section class="leave-card">
+      <div class="card-heading">
+        <h2>Attendance Drop Planner</h2>
+        <p>Plan future leave and see how your attendance changes when only Monday to Friday are class days.</p>
+      </div>
+
+      <form id="leave-form" class="leave-form" novalidate>
+        <label class="input-group">
+          <span>Leave Start Date</span>
+          <input id="leaveStartDate" type="date" required>
+        </label>
+
+        <label class="input-group">
+          <span>Number Of Days</span>
+          <input id="leaveDays" type="number" min="1" step="1" placeholder="e.g. 7" required>
+        </label>
+
+        <button type="submit" class="primary-btn">Check Attendance Drop</button>
+      </form>
+
+      <div class="leave-results" aria-live="polite">
+        <article class="leave-result-box">
+          <p class="result-label">Classes Missed</p>
+          <h3 id="leaveClassDays">0</h3>
+        </article>
+
+        <article class="leave-result-box">
+          <p class="result-label">Projected Attendance</p>
+          <h3 id="projectedAttendance">0%</h3>
+        </article>
+
+        <article class="leave-result-box">
+          <p class="result-label">Attendance Drop</p>
+          <h3 id="attendanceDrop">0%</h3>
+        </article>
+
+        <article class="leave-result-box">
+          <p class="result-label">Classes To Keep 75%</p>
+          <h3 id="maintainSeventyFive">0</h3>
+        </article>
+      </div>
+
+      <p id="leaveStatus" class="leave-status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

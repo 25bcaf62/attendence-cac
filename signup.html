@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup | Attendance Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="background-orb orb-one"></div>
+  <div class="background-orb orb-two"></div>
+  <div class="background-grid"></div>
+
+  <main class="auth-page">
+    <section class="auth-card">
+      <p class="eyebrow">Kristu Jayanti Access</p>
+      <h1 class="auth-title">Create Your Account</h1>
+      <p class="auth-copy">
+        Register once with your email and use the same account to log in to the attendance dashboard.
+      </p>
+
+      <form id="signup-form" class="auth-form" novalidate>
+        <label class="input-group">
+          <span>Full Name</span>
+          <input id="signupName" type="text" placeholder="Enter your full name" required>
+        </label>
+
+        <label class="input-group">
+          <span>Email</span>
+          <input id="signupEmail" type="email" placeholder="name@gmail.com" required>
+        </label>
+
+        <label class="input-group">
+          <span>Department Or Course</span>
+          <input id="signupCourse" type="text" placeholder="e.g. BCA / MBA / BCom" required>
+        </label>
+
+        <label class="input-group">
+          <span>Password</span>
+          <input id="signupPassword" type="password" placeholder="Create a password" required>
+        </label>
+
+        <div class="password-tools">
+          <button type="button" id="generatePasswordButton" class="secondary-btn">Generate Strong Password</button>
+          <p class="password-rules">
+            Password rules: at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.
+          </p>
+        </div>
+
+        <button type="submit" class="primary-btn">Create Account</button>
+      </form>
+
+      <p id="signupStatus" class="auth-status" aria-live="polite"></p>
+      <p class="auth-helper">
+        Already registered?
+        <a href="index.html">Back to login</a>
+      </p>
+    </section>
+  </main>
+
+  <script src="signup.js"></script>
+</body>
+</html>
